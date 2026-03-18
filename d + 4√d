@@ -8,3 +8,9 @@ awk 'NR>1 {sum+=$3} END {
 }' Total_Filtered_indv95_miss70.ldepth.mean
 
 vcftools --gzvcf Total_Filtered_indv95_miss70.vcf.gz --max-meanDP 64 --recode --recode-INFO-all --out Total_Filtered_indv95_miss70_DP64
+
+#Generates a file reporting the missingness on a per-individual basis. The file has the suffix ".imiss".
+vcftools --vcf Total_Filtered_indv95_miss50_DP47.recode.vcf --missing-indv --out Total_Filtered_indv95_miss50_DP47 
+
+#Outputs the allele frequency for each site in a file with the suffix ".frq"
+vcftools --vcf Total_Filtered_indv95_miss50_DP47.recode.vcf --freq --out Total_Filtered_indv95_miss50_DP47
