@@ -6,3 +6,5 @@ awk 'NR>1 {sum+=$3} END {
     print "Mean Depth (d): " d;
     print "Max Depth Threshold: " max_d;
 }' Total_Filtered_indv95_miss70.ldepth.mean
+
+vcftools --gzvcf Total_Filtered_indv95_miss70.vcf.gz --max-meanDP 64 --recode --recode-INFO-all --out Total_Filtered_indv95_miss70_DP64
