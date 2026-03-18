@@ -1,0 +1,8 @@
+vcftools --gzvcf Total_Filtered_indv95_miss70.vcf.gz --site-mean-depth --out Total_Filtered_indv95_miss70
+
+awk 'NR>1 {sum+=$3} END {
+    d = sum/(NR-1);
+    max_d = d + 4 * sqrt(d);
+    print "Mean Depth (d): " d;
+    print "Max Depth Threshold: " max_d;
+}' Total_Filtered_indv95_miss70.ldepth.mean
