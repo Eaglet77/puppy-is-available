@@ -14,3 +14,6 @@ vcftools --vcf Total_Filtered_indv95_miss50_DP47.recode.vcf --missing-indv --out
 
 #Outputs the allele frequency for each site in a file with the suffix ".frq"
 vcftools --vcf Total_Filtered_indv95_miss50_DP47.recode.vcf --freq --out Total_Filtered_indv95_miss50_DP47
+
+#Include only sites with a Minor Allele Frequency greater than or equal to the "--maf"
+vcftools --vcf Total_Filtered_indv95_miss60_DP54.recode.vcf --maf 0.05 --recode --recode-INFO-all --out Total_Filtered_indv95_miss60_DP54_maf005
