@@ -17,3 +17,8 @@ vcftools --vcf Total_Filtered_indv95_miss50_DP47.recode.vcf --freq --out Total_F
 
 #Include only sites with a Minor Allele Frequency greater than or equal to the "--maf"
 vcftools --vcf Total_Filtered_indv95_miss60_DP54.recode.vcf --maf 0.05 --recode --recode-INFO-all --out Total_Filtered_indv95_miss60_DP54_maf005
+
+#Linkage Disequilibrium
+plink --vcf Total_Filtered_indv95_miss60_DP54_maf001.recode.vcf --double-id --allow-extra-chr --indep-pairwise 95 1 0.5 --out 
+wc -l Total_Filtered_indv95_miss60_DP54_maf001_ld05.prune.in
+plink --vcf Total_Filtered_indv95_miss60_DP54_maf001.recode.vcf --double-id --allow-extra-chr --extract Total_Filtered_indv95_miss60_DP54_maf001_ld05.prune.in --pca 20 --out Filtered_indv95_miss60_DP54_maf001_ld05
