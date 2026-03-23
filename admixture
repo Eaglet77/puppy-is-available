@@ -1,0 +1,6 @@
+##Admixture
+
+#input file preparation
+plink --vcf Total_Filtered_indv95_miss70_DP64_maf001.recode.vcf --make-bed --out Total_Filtered_indv95_miss70_DP64_maf001 --allow-extra-chr 
+
+#LD
