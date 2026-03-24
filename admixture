@@ -1,6 +1,8 @@
 ##Admixture
 
-#input file preparation
+#input file preparation .fam .bim .bed .nosex
 plink --vcf Total_Filtered_indv95_miss70_DP64_maf001.recode.vcf --make-bed --out Total_Filtered_indv95_miss70_DP64_maf001 --allow-extra-chr 
 
 #LD
+plink --vcf Total_Filtered_indv95_miss70_DP64_maf001.recode.vcf --indep-pairwise 95 1 0.5 --out Total_Filtered_indv95_miss70_DP64_maf001_ld05
+plink --bfile Total_Filtered_indv95_miss70_DP64_maf001 --extract Total_Filtered_indv95_miss70_DP64_maf001_ld05.prune.in --make-bed --out Total_Filtered_indv95_miss70_DP64_maf001_ld05 
