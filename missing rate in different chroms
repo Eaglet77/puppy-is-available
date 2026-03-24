@@ -1,0 +1,88 @@
+#generate individual list of each species
+grep "^FRAAME" Total_Filtered_missing50.imiss | awk '{print $1}' > white_inds.txt
+#calculate the missing rate of sites in this species
+vcftools --vcf Total_Filtered_missing50.recode.vcf --keep white_inds.txt --missing-site --out Total_Filtered_missing50_white
+
+
+##plot in R 📸
+library(ggplot2)
+library(dplyr)
+
+# 1. 读取数据并计算检出率
+white_site <- read.table("Total_Filtered_missing50_white.lmiss", header=TRUE, stringsAsFactors=FALSE)
+green_site <- read.table("Total_Filtered_missing50_green.lmiss", header=TRUE, stringsAsFactors=FALSE)
+
+white_site$Call_Rate <- 1 - white_site$F_MISS
+green_site$Call_Rate <- 1 - green_site$F_MISS
+
+white_site$Species <- "White Ash (FRAAME)"
+green_site$Species <- "Green Ash (FRAPEN)"
+
+combined_site <- rbind(
+  white_site[, c("CHR", "POS", "Call_Rate", "Species")],
+  green_site[, c("CHR", "POS", "Call_Rate", "Species")]
+)
+
+top_23_chroms <- names(sort(table(combined_site$CHR), decreasing = TRUE)[1:23])
+plot_data <- combined_site %>% filter(CHR %in% top_23_chroms)
+
+# 让染色体按 SNP 数量或者名字排序，保持面板整洁
+plot_data$CHROM <- factor(plot_data$CHR, levels = top_23_chroms)
+
+# # 3. 画图并排版为 5 列
+# p <- ggplot(plot_data, aes(x = POS / 1e6, y = Call_Rate, color = Species)) +
+#   geom_smooth(method = "loess", span = 0.1, se = FALSE, size = 1) +
+#   # ncol = 5 表示将 23 个图排成 5 列（大概 5 行）
+#   facet_wrap(~ CHROM, scales = "free_x", ncol = 5) +
+#   scale_color_manual(values = c("Green Ash (FRAPEN)" = "#56B4E9", 
+#                                 "White Ash (FRAAME)" = "#E69F00")) +
+#   theme_bw() +
+#   labs(title = "Whole-Genome Mapping Distribution: White vs. Green Ash",
+#        subtitle = "Smoothed Call Rate across all 23 chromosomes (Reference: Green Ash)",
+#        x = "Genomic Position (Megabases, Mb)",
+#        y = "Mean Call Rate") +
+#   theme(legend.position = "top",
+#         legend.title = element_blank(),
+#         axis.text.x = element_text(angle = 45, hjust = 1, size = 6), # 缩小坐标轴字体防止重叠
+#         strip.text = element_text(size = 8, face = "bold")) # 调整每张小图的标题字体
+# p
+# # 4. 关键修改：直接保存为一张超大的高清 PDF
+# # 这样你可以在本地电脑上放大查看每一个细节
+# ggsave("Total_Filtered_missing10_mapping_23Chr.pdf", plot = p, width = 16, height = 12, dpi = 300)
+# 
+# cat("✅ 包含 23 条染色体的高清全景图已保存为 'Whole_Genome_Mapping_23Chr.pdf'！\n")
+# # 如果没加载 mgcv 包，先加载它（R 自带的，专门用来跑 GAM 模型）
+
+##############################################
+library(mgcv)
+ordered_chroms <- sort(top_23_chroms)
+
+# 用排好序的 ordered_chroms 作为 levels，这样 facet_wrap 画图时就会按这个顺序排版
+plot_data$CHROM <- factor(plot_data$CHR, levels = ordered_chroms)
+# ---------------------------------------------------------
+# 极速秘诀 1：随机抽样 (Downsampling)
+# 我们只随机抽取 5% 的 SNP 来画趋势线，这对宏观趋势毫无影响，但速度起飞！
+# ---------------------------------------------------------
+# set.seed(42) # 设置随机种子，保证每次抽样结果一样
+# plot_data_fast <- plot_data %>% sample_frac(0.05) 
+# plot_data_fast
+# ---------------------------------------------------------
+# 极速秘诀 2：换用 GAM 算法
+# ---------------------------------------------------------
+p <- ggplot(plot_data, aes(x = POS / 1e6, y = Call_Rate, color = Species)) +
+  # 把 method 从 "loess" 改成 "gam"，并指定平滑公式
+  geom_smooth(method = "gam", formula = y ~ s(x, bs = "cs"), se = FALSE, size = 1) +
+  facet_wrap(~ CHROM, scales = "free_x", ncol = 5) +
+  scale_color_manual(values = c("Green Ash (FRAPEN)" = "#56B4E9", 
+                                "White Ash (FRAAME)" = "#E69F00")) +
+  theme_bw() +
+  labs(title = "Whole-Genome Mapping Distribution: White vs. Green Ash",
+       subtitle = "Smoothed Call Rate (GAM method, 5% downsampled)",
+       x = "Genomic Position (Megabases, Mb)",
+       y = "Mean Call Rate") +
+  theme(legend.position = "top",
+        legend.title = element_blank(),
+        axis.text.x = element_text(angle = 45, hjust = 1, size = 6), 
+        strip.text = element_text(size = 8, face = "bold"))
+p
+ggsave("Total_Filtered_missing30_mapping_23Chr_allsnps.pdf", plot = p, width = 16, height = 12, dpi = 300)
