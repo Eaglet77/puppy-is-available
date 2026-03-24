@@ -1,0 +1,8 @@
+# how many individuals in the vcf
+bcftools query -l your_file.vcf | wc -l
+
+# quick check the last 5 sites
+#vcf
+tail -n 5 your_file.vcf | cut -f 1-5
+#vcf.gz slow
+bcftools view your_file.vcf.gz | tail -n 5 | cut -f 1-5
