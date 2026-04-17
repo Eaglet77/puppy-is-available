@@ -1,0 +1,56 @@
+library(data.table)
+library(dplyr)
+library(ggplot2)
+setwd("/storage/home/mpl6157/scratch/Fraxinus_data/chrom")
+
+geno_matrix <- fread("Chr01_matrix.012", drop = 1, data.table = FALSE)
+indv <- fread("Chr01_matrix.012.indv", header = FALSE)$V1
+pos <- fread("Chr01_matrix.012.pos", header = FALSE)
+colnames(pos) <- c("CHR", "POS")
+rownames(geno_matrix) <- indv
+
+
+window_size <- 500000 
+pos$Window_Center <- floor(pos$POS / window_size) * window_size + (window_size / 2)
+windows <- sort(unique(pos$Window_Center))
+results_list <- list()
+
+
+for (w in windows) {
+  snp_idx <- which(pos$Window_Center == w)
+  total_snps <- length(snp_idx)
+  if (total_snps < 5) next 
+  sub_mat <- geno_matrix[, snp_idx, drop = FALSE]
+
+  called_counts <- rowSums(sub_mat != -1)
+  call_rate <- (called_counts / total_snps) * 100
+
+  results_list[[as.character(w)]] <- data.frame(
+    Individual = indv,
+    Position_Mb = w / 1000000, 
+    Calling_Rate = call_rate
+  )
+}
+
+plot_data <- bind_rows(results_list)
+metadata <- read.table("indv.list", header = T)
+plot_data <- left_join(plot_data, metadata, by = "Individual")
+p <- ggplot(plot_data, aes(x = Position_Mb, y = Calling_Rate, color = Species)) +
+  # alpha=0.1 
+  # stroke=0 
+  geom_point(alpha = 0.1, size = 1, stroke = 0) +  
+  geom_smooth(method = "loess", se = FALSE, span = 0.1, linewidth = 1.5) + 
+  theme_minimal(base_size = 14) +
+  scale_color_manual(values = c("white" = "#2ca02c", "green" = "#1f77b4")) +
+  labs(
+    title = "Chromosome 04 - Sliding Window Calling Rate",
+    subtitle = paste("Window Size:", window_size/1000, "kb | Mapping Ref: green ash"),
+    x = "Genomic Position (Mb)",
+    y = "Calling Rate (%)"
+  ) +
+  theme(
+    legend.position = "bottom",
+    panel.grid.minor = element_blank()
+  )
+p
+ggsave("Chr01_Calling_Rate_Plot.pdf", plot = p, width = 10, height = 5, dpi = 300)
