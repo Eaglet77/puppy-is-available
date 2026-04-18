@@ -9,6 +9,9 @@ awk 'NR>1 {sum+=$3} END {
 
 vcftools --gzvcf Total_Filtered_indv95_miss70.vcf.gz --max-meanDP 64 --recode --recode-INFO-all --out Total_Filtered_indv95_miss70_DP64
 
+#recalculate ALT
+vcf_filter -n 1 -c 4 --mem=16G -t 24:00:00 --wrap="bcftools view -v snps -a --threads 4 TotalRawSNPs_mqmerge_QDPbi_mac3_miss50_dele70_miss80_maf001_DP68.recode.vcf -O v -o TotalRawSNPs_mqmerge_QDPbi_mac3_miss50_dele70_miss80_maf001_DP68bi.vcf"
+
 #Generates a file reporting the missingness on a per-individual basis. The file has the suffix ".imiss".
 vcftools --vcf Total_Filtered_indv95_miss50_DP47.recode.vcf --missing-indv --out Total_Filtered_indv95_miss50_DP47 
 
