@@ -10,7 +10,12 @@ awk 'NR>1 {sum+=$3} END {
 vcftools --gzvcf Total_Filtered_indv95_miss70.vcf.gz --max-meanDP 64 --recode --recode-INFO-all --out Total_Filtered_indv95_miss70_DP64
 
 #recalculate ALT
-vcf_filter -n 1 -c 4 --mem=16G -t 24:00:00 --wrap="bcftools view -v snps -a --threads 4 TotalRawSNPs_mqmerge_QDPbi_mac3_miss50_dele70_miss80_maf001_DP68.recode.vcf -O v -o TotalRawSNPs_mqmerge_QDPbi_mac3_miss50_dele70_miss80_maf001_DP68bi.vcf"
+sbatch -J vcf_filter -n 1 -c 4 --mem=16G -t 24:00:00 --wrap="bcftools view \
+-v snps -a --threads 4 TotalRawSNPs_mqmerge_QDPbi_mac3_miss50_dele70_miss80_maf001_DP68.recode.vcf \
+-O v -o TotalRawSNPs_mqmerge_QDPbi_mac3_miss50_dele70_miss80_maf001_DP68bi.vcf"
+
+# MNPs tp SNPs, remove indel, un-biallelic
+sbatch -J vcf_filter -n 1 -c 4 --mem=16G -t 24:00:00 --wrap="bcftools norm -a TotalRawSNPs_mqmerge_QDPbi_mac3_miss50_dele70_miss80_maf001_DP68bi.vcf --threads 4 | bcftools view -v snps -m2 -M2 -O v -o TotalRawSNPs_mqmerge_QDPbi_mac3_miss50_dele70_miss80_maf001_DP68bi_indelbiallelic.vcf --threads 4"
 
 #Generates a file reporting the missingness on a per-individual basis. The file has the suffix ".imiss".
 vcftools --vcf Total_Filtered_indv95_miss50_DP47.recode.vcf --missing-indv --out Total_Filtered_indv95_miss50_DP47 
@@ -22,6 +27,26 @@ vcftools --vcf Total_Filtered_indv95_miss50_DP47.recode.vcf --freq --out Total_F
 vcftools --vcf Total_Filtered_indv95_miss60_DP54.recode.vcf --maf 0.05 --recode --recode-INFO-all --out Total_Filtered_indv95_miss60_DP54_maf005
 
 #Linkage Disequilibrium
-plink --vcf Total_Filtered_indv95_miss60_DP54_maf001.recode.vcf --double-id --allow-extra-chr --indep-pairwise 95 1 0.5 --out 
+plink --vcf TotalRawSNPs_mqmerge_QDPbi_mac3_miss50_dele70_miss80_maf001_DP68bi_indelbiallelic.vcf \
+        --set-missing-var-ids @:# \
+        --indep-pairwise 50 10 0.5 \
+        --out TotalRawSNPs_mqmerge_QDPbi_mac3_miss50_dele70_miss80_maf001_DP68bi_indelbiallelic
+#check loci amount
 wc -l Total_Filtered_indv95_miss60_DP54_maf001_ld05.prune.in
-plink --vcf Total_Filtered_indv95_miss60_DP54_maf001.recode.vcf --double-id --allow-extra-chr --extract Total_Filtered_indv95_miss60_DP54_maf001_ld05.prune.in --pca 20 --out Filtered_indv95_miss60_DP54_maf001_ld05
+#PCA
+plink --vcf TotalRawSNPs_mqmerge_QDPbi_mac3_miss50_dele70_miss80_maf001_DP68bi_indelbiallelic.vcf \
+        --set-missing-var-ids @:# \
+        --extract TotalRawSNPs_mqmerge_QDPbi_mac3_miss50_dele70_miss80_maf001_DP68bi_indelbiallelic.prune.in \
+        --pca 20 \
+        --allow-extra-chr \
+        --out TotalRawSNPs_mqmerge_QDPbi_mac3_miss50_dele70_miss80_maf001_DP68bi_indelbiallelic_ld05
+#generate vcf file
+plink --vcf TotalRawSNPs_mqmerge_QDPbi_mac3_miss50_dele70_miss80_maf001_DP68bi_indelbiallelic.vcf \
+  --set-missing-var-ids @:# \
+  --double-id \
+  --allow-extra-chr \
+  --extract TotalRawSNPs_mqmerge_QDPbi_mac3_miss50_dele70_miss80_maf001_DP68bi_indelbiallelic.prune.in \
+  --keep-allele-order \
+  --recode vcf-iid \
+  --out TotalRawSNPs_mqmerge_QDPbi_mac3_miss50_dele70_miss80_maf001_DP68bi_indelbiallelic_ld05
+
