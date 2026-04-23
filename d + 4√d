@@ -15,7 +15,7 @@ sbatch -J vcf_filter -n 1 -c 4 --mem=16G -t 24:00:00 --wrap="bcftools view \
 -O v -o TotalRawSNPs_mqmerge_QDPbi_mac3_miss50_dele70_miss80_maf001_DP68bi.vcf"
 
 # MNPs tp SNPs, remove indel, un-biallelic
-sbatch -J vcf_filter -n 1 -c 4 --mem=16G -t 24:00:00 --wrap="bcftools norm -a --threads 4 TotalRawSNPs_mqmerge_QDPbi_mac3_miss50_dele70_miss80_maf001_DP68bi.vcf | bcftools view -v snps -m2 -M2 -O v -o --threads 4 TotalRawSNPs_mqmerge_QDPbi_mac3_miss50_dele70_miss80_maf001_DP68bi_indelbiallelic.vcf "
+sbatch -J vcf_filter -n 1 -c 4 --mem=16G -t 24:00:00 --wrap="bcftools norm -a --threads 4 TotalRawSNPs_mqmerge_QDPbi_mac3_miss50_dele70_miss80_maf001_DP68bi.vcf | bcftools view -v snps --threads 4 -m2 -M2 -O v -o TotalRawSNPs_mqmerge_QDPbi_mac3_miss50_dele70_miss80_maf001_DP68bi_indelbiallelic.vcf "
 
 #Generates a file reporting the missingness on a per-individual basis. The file has the suffix ".imiss".
 vcftools --vcf Total_Filtered_indv95_miss50_DP47.recode.vcf --missing-indv --out Total_Filtered_indv95_miss50_DP47 
