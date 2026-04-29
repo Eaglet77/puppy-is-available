@@ -8,3 +8,6 @@ plink --vcf Total_Filtered_indv95_miss70_DP64_maf001.recode.vcf --indep-pairwise
 plink --bfile Total_Filtered_indv95_miss70_DP64_maf001 --extract Total_Filtered_indv95_miss70_DP64_maf001_ld05.prune.in --make-bed --out Total_Filtered_indv95_miss70_DP64_maf001_ld05 
 
 paste <(awk '{print $1"_"$2}' Total_Filtered_QDP_mac3_miss50_dele70_miss70_maf001_DP55bi_indelbiallelic_ld05.fam ) Total_Filtered_QDP_mac3_miss50_dele70_miss70_maf001_DP55bi_indelbiallelic_ld05.2.Q > k2_merged.txt
+grep "FRAAME" k2_merged.txt | head
+awk '$3 > 0.99 {print $1}' k2_merged.txt > ame_refs.txt
+awk '$2 > 0.99 {print $1}' k2_merged.txt > pen_refs.txt
