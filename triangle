@@ -1,0 +1,23 @@
+bcftools query -l my_ash_data.vcf.gz > all_samples.txt
+
+awk '
+  # 读取参考名单并存入数组
+  NR==FNR { ame[$1]=1; next }
+  NR==FNR+f1 { pen[$1]=1; next }
+  
+  # 开始处理所有样本
+  {
+    if ($1 in ame) {
+        print $1 "\tFRAAMEref"
+    } else if ($1 in pen) {
+        print $1 "\tFRAPENref"
+    } else if ($1 ~ /^FRAAME/) {
+        print $1 "\tFRAAME"
+    } else if ($1 ~ /^FRAPEN/) {
+        print $1 "\tFRAPEN"
+    } else {
+        print $1 "\tUnknown"
+    }
+  }
+' ame_refs.txt f1=$(wc -l < ame_refs.txt) pen_refs.txt all_samples.txt > popmap.txt
+
