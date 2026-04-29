@@ -6,3 +6,5 @@ plink --vcf Total_Filtered_indv95_miss70_DP64_maf001.recode.vcf --make-bed --out
 #LD
 plink --vcf Total_Filtered_indv95_miss70_DP64_maf001.recode.vcf --indep-pairwise 95 1 0.5 --out Total_Filtered_indv95_miss70_DP64_maf001_ld05
 plink --bfile Total_Filtered_indv95_miss70_DP64_maf001 --extract Total_Filtered_indv95_miss70_DP64_maf001_ld05.prune.in --make-bed --out Total_Filtered_indv95_miss70_DP64_maf001_ld05 
+
+paste <(awk '{print $2}' Total_Filtered_QDP_mac3_miss50_dele70_miss70_maf001_DP55bi_indelbiallelic_ld05.fam ) Total_Filtered_QDP_mac3_miss50_dele70_miss70_maf001_DP55bi_indelbiallelic_ld05.2.Q > k2_merged.txt
